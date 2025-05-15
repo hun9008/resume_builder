@@ -2,9 +2,10 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Bold, Italic, List, ListOrdered, Link } from "lucide-react"
+
 
 type ProfessionalSummaryProps = {
   data: string
@@ -15,13 +16,32 @@ export default function ProfessionalSummary({ data, updateData }: ProfessionalSu
   const [charCount, setCharCount] = useState(0)
   const [isEditorFocused, setIsEditorFocused] = useState(false)
   const maxChars = 600
+  const summaryRef = useRef<string>(data)
 
-  useEffect(() => {
-    // Count characters without HTML tags
+  const editorRef = useRef<HTMLDivElement>(null)
+
+useEffect(() => {
+  if (!isEditorFocused && editorRef.current) {
+    editorRef.current.innerHTML = data
     const div = document.createElement("div")
     div.innerHTML = data
     setCharCount(div.textContent?.length || 0)
-  }, [data])
+  }
+}, [data, isEditorFocused])
+
+  // useEffect(() => {
+  //   // Count characters without HTML tags
+  //   const div = document.createElement("div")
+  //   div.innerHTML = data
+  //   setCharCount(div.textContent?.length || 0)
+  // }, [data])
+  useEffect(() => {
+  if (!isEditorFocused) {
+    const div = document.createElement("div")
+    div.innerHTML = data
+    setCharCount(div.textContent?.length || 0)
+  }
+}, [data, isEditorFocused])
 
   const handleBold = () => {
     document.execCommand("bold", false)
@@ -56,15 +76,15 @@ export default function ProfessionalSummary({ data, updateData }: ProfessionalSu
     }
   }
 
-  const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
-    const content = (e.target as HTMLDivElement).innerHTML
-    updateData(content)
+  // const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
+  //   const content = (e.target as HTMLDivElement).innerHTML
+  //   updateData(content)
 
-    // Count characters without HTML tags
-    const div = document.createElement("div")
-    div.innerHTML = content
-    setCharCount(div.textContent?.length || 0)
-  }
+  //   // Count characters without HTML tags
+  //   const div = document.createElement("div")
+  //   div.innerHTML = content
+  //   setCharCount(div.textContent?.length || 0)
+  // }
 
   return (
     <div className="space-y-4">
@@ -97,7 +117,7 @@ export default function ProfessionalSummary({ data, updateData }: ProfessionalSu
             Get help with writing
           </Button>
         </div>
-        <div
+        {/* <div
           id="summary-editor"
           contentEditable
           className={`p-4 min-h-[150px] focus:outline-none ${isEditorFocused ? "ring-2 ring-blue-500" : ""}`}
@@ -105,6 +125,28 @@ export default function ProfessionalSummary({ data, updateData }: ProfessionalSu
           onInput={handleContentChange}
           onFocus={() => setIsEditorFocused(true)}
           onBlur={() => setIsEditorFocused(false)}
+        ></div> */}
+        <div
+          id="summary-editor"
+          ref={editorRef}
+          contentEditable
+          dir="ltr"
+          className={`p-4 min-h-[150px] focus:outline-none text-left ${isEditorFocused ? "ring-2 ring-blue-500" : ""}`}
+          onInput={(e) => {
+            const content = (e.target as HTMLDivElement).innerHTML
+            summaryRef.current = content
+
+            const div = document.createElement("div")
+            div.innerHTML = content
+            setCharCount(div.textContent?.length || 0)
+          }}
+          onFocus={() => {
+            setIsEditorFocused(true)
+          }}
+          onBlur={() => {
+            setIsEditorFocused(false)
+            updateData(summaryRef.current)
+          }}
         ></div>
       </div>
 

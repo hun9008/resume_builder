@@ -19,6 +19,7 @@ import {
   MoveDown,
 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
+import { useRef } from "react"
 
 type EducationProps = {
   data: {
@@ -37,7 +38,7 @@ type EducationProps = {
 
 export default function Education({ data, updateData, onReorder }: EducationProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
-
+  const descriptionRefs = useRef<Record<string, string>>({})
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id)
   }
@@ -280,14 +281,32 @@ export default function Education({ data, updateData, onReorder }: EducationProp
                       <Link className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div
+                  {/* <div
                     id={`description-editor-${education.id}`}
                     contentEditable
-                    className="p-4 min-h-[150px] focus:outline-none"
+                    dir="ltr"
+                    className="p-4 min-h-[150px] focus:outline-none text-left"
                     dangerouslySetInnerHTML={{ __html: education.description }}
                     onInput={(e) => {
                       const content = (e.target as HTMLDivElement).innerHTML
                       handleChange(education.id, "description", content)
+                    }}
+                  ></div> */}
+                  <div
+                    id={`description-editor-${education.id}`}
+                    contentEditable
+                    dir="ltr"
+                    className="p-4 min-h-[150px] focus:outline-none text-left"
+                    dangerouslySetInnerHTML={{ __html: education.description }}
+                    onInput={(e) => {
+                      const content = (e.target as HTMLDivElement).innerHTML
+                      descriptionRefs.current[education.id] = content
+                    }}
+                    onBlur={() => {
+                      const content = descriptionRefs.current[education.id]
+                      if (content !== undefined) {
+                        handleChange(education.id, "description", content)
+                      }
                     }}
                   ></div>
                 </div>

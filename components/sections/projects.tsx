@@ -20,6 +20,7 @@ import {
   MoveDown,
 } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
+import { useRef } from "react"
 
 type ProjectsProps = {
   data: {
@@ -39,6 +40,7 @@ type ProjectsProps = {
 export default function Projects({ data, updateData, onReorder }: ProjectsProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [newTech, setNewTech] = useState<string>("")
+  const descriptionRefs = useRef<{ [key: string]: string }>({})
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id)
@@ -337,7 +339,7 @@ export default function Projects({ data, updateData, onReorder }: ProjectsProps)
                       <Link className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div
+                  {/* <div
                     id={`description-editor-${project.id}`}
                     contentEditable
                     className="p-4 min-h-[150px] focus:outline-none"
@@ -345,6 +347,23 @@ export default function Projects({ data, updateData, onReorder }: ProjectsProps)
                     onInput={(e) => {
                       const content = (e.target as HTMLDivElement).innerHTML
                       handleChange(project.id, "description", content)
+                    }}
+                  ></div> */}
+                  <div
+                    id={`description-editor-${project.id}`}
+                    contentEditable
+                    dir="ltr"
+                    className="p-4 min-h-[150px] focus:outline-none text-left"
+                    dangerouslySetInnerHTML={{ __html: project.description }}
+                    onInput={(e) => {
+                      const content = (e.target as HTMLDivElement).innerHTML
+                      descriptionRefs.current[project.id] = content
+                    }}
+                    onBlur={() => {
+                      const content = descriptionRefs.current[project.id]
+                      if (content !== undefined) {
+                        handleChange(project.id, "description", content)
+                      }
                     }}
                   ></div>
                 </div>

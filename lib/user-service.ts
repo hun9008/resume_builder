@@ -188,7 +188,9 @@ const users: User[] = [
           description: "Excellence Award\nUsed React",
         },
       ],
-      sectionOrder: ["experience", "education", "projects", "awards", "skills"],
+      publications: [
+      ],
+      sectionOrder: ["experience", "education", "projects", "awards", "skills", "publications"],
     },
   },
 ]

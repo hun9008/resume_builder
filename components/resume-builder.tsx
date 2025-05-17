@@ -8,6 +8,7 @@ import ProfessionalSummary from "@/components/sections/professional-summary"
 import Education from "@/components/sections/education"
 import Projects from "@/components/sections/projects"
 import Experience from "@/components/sections/experience"
+import Publications from "@/components/sections/publications"
 import Skills from "@/components/sections/skills"
 import Awards from "@/components/sections/awards"
 import ResumePreview from "@/components/resume-preview"
@@ -70,6 +71,16 @@ export type ResumeData = {
     url: string
     description: string
   }[]
+  publications: {
+    id: string
+    title: string
+    conference: string
+    authors: string
+    status: string // "Submitted", "Under Review", etc.
+    date: string
+    url: string
+    summary: string
+  }[]
   sectionOrder?: string[]
 }
 
@@ -89,7 +100,8 @@ const emptyResumeData: ResumeData = {
   experience: [],
   skills: [],
   awards: [],
-  sectionOrder: ["experience", "education", "projects", "awards", "skills"],
+  publications: [],
+  sectionOrder: ["experience", "education", "projects", "publications", "awards", "skills"],
 }
 
 // Define section types for reordering
@@ -103,6 +115,7 @@ const sectionTypes: SectionType[] = [
   { id: "experience", title: "Experience", key: "experience" },
   { id: "education", title: "Education", key: "education" },
   { id: "projects", title: "Projects", key: "projects" },
+  { id: "publications", title: "Publications", key: "publications" },
   { id: "awards", title: "Awards", key: "awards" },
   { id: "skills", title: "Skills", key: "skills" },
 ]
@@ -478,6 +491,31 @@ export default function ResumeBuilder() {
                   data={resumeData.projects}
                   updateData={(data) => updateResumeData("projects", data)}
                   onReorder={(fromIndex, toIndex) => moveItem("projects", fromIndex, toIndex)}
+                />
+              </div>
+            )}
+          </Card>
+        )
+      case "publications":
+        return (
+          <Card className="border rounded-lg overflow-hidden" key="publications">
+            <div
+              className="p-4 cursor-pointer flex justify-between items-center"
+              onClick={() => toggleSection("publications")}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-medium">Publications</span>
+              </div>
+              <div className="flex items-center">
+                <span>{activeSection === "publications" ? "▲" : "▼"}</span>
+              </div>
+            </div>
+            {activeSection === "publications" && (
+              <div className="p-4 pt-0 border-t">
+                <Publications
+                  data={resumeData.publications}
+                  updateData={(data) => updateResumeData("publications", data)}
+                  onReorder={(fromIndex, toIndex) => moveItem("publications", fromIndex, toIndex)}
                 />
               </div>
             )}

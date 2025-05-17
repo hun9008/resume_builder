@@ -9,7 +9,7 @@ type ResumePreviewProps = {
 }
 
 export default function ResumePreview({ resumeData }: ResumePreviewProps) {
-  const { personalDetails, professionalSummary, education, projects, experience, skills, awards } = resumeData
+  const { personalDetails, professionalSummary, education, projects, experience, skills, awards, publications } = resumeData
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [pageContents, setPageContents] = useState<JSX.Element[][]>([])
@@ -23,7 +23,7 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
   useEffect(() => {
     if (resumeRef.current) {
       // Get the sections in the order they should appear
-      const sectionOrder = resumeData.sectionOrder || ["education", "projects", "experience", "skills", "awards"]
+      const sectionOrder = resumeData.sectionOrder || ["education", "projects", "experience", "skills", "awards", "publications"]
 
       // Generate all section elements
       const header = (
@@ -158,6 +158,46 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
                               </a>
                             </div>
                           )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null
+            case "publications":
+              return publications.length > 0 ? (
+                <div className="mb-6" key="publications">
+                  <h2 className="text-sm font-bold border-b border-gray-300 pb-1 mb-3 text-gray-800">
+                    {String(sectionNumber).padStart(2, "0")}. PUBLICATIONS
+                  </h2>
+                  <div className="space-y-2">
+                    {publications.map((pub, index) => (
+                      <div key={index} className="grid grid-cols-[1fr_2fr] gap-2">
+                        <div className="text-sm text-gray-700">
+                          {pub.date && <div className="font-medium">{pub.date}</div>}
+                        </div>
+                        <div>
+                          <div className="flex flex-col">
+                            <h3 className="font-semibold text-gray-900">{pub.title}</h3>
+                            <div className="text-sm text-gray-700">{pub.authors}</div>
+                            <div className="text-sm text-gray-600 italic">{pub.conference}</div>
+                            <div className="text-sm text-gray-500">{pub.status}</div>
+                            {pub.summary && (
+                              <div className="text-sm text-gray-700 break-words whitespace-pre-wrap">{pub.summary}</div>
+                            )}
+                            {pub.url && (
+                              <div className="text-xs mt-0.5">
+                                <a
+                                  href={pub.url}
+                                  className="text-blue-600 hover:underline"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {pub.url}
+                                </a>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -304,89 +344,6 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
         })
         .filter(Boolean) as JSX.Element[]
 
-      // Estimate section heights based on content
-      // This is a simplified approach that doesn't require DOM manipulation
-      // const estimateHeight = (section: JSX.Element): number => {
-      //   // Base height for each section type
-      //   const baseHeights: Record<string, number> = {
-      //     header: 180,
-      //     education: 100,
-      //     projects: 120,
-      //     experience: 100,
-      //     skills: 80,
-      //     awards: 100,
-      //   }
-
-      //   // Get section key from the key property
-      //   const sectionKey = section.key as string
-
-      //   // Base height for the section type
-      //   let height = baseHeights[sectionKey] || 100
-
-      //   // Add height based on content amount
-      //   switch (sectionKey) {
-      //     case "header":
-      //       // Add height for links
-      //       height += personalDetails.links.length * 10
-      //       // Add height for summary based on character count
-      //       const summaryLength = professionalSummary.length
-      //       height += Math.ceil(summaryLength / 100) * 20
-      //       break
-      //     case "education":
-      //       height += education.length * 80
-      //       break
-      //     case "projects":
-      //       height += projects.length * 100
-      //       break
-      //     case "experience":
-      //       height += experience.length * 80
-      //       break
-      //     case "skills":
-      //       height += Math.ceil(skills.length / 2) * 30 // 2 skills per row
-      //       break
-      //     case "awards":
-      //       height += awards.length * 80
-      //       break
-      //   }
-
-      //   return height
-      // }
-
-      // Distribute content across pages
-      // const pages: JSX.Element[][] = []
-      // let currentPage: JSX.Element[] = [header]
-      // let currentHeight = estimateHeight(header)
-      // const maxHeight = pageHeight - topMargin - bottomMargin // Subtract margins
-
-      // Distribute sections across pages
-      // for (const section of allSections) {
-      //   const sectionHeight = estimateHeight(section)
-
-      //   // Check if adding this section would exceed page height
-      //   if (currentHeight + sectionHeight > maxHeight) {
-      //     // Start a new page
-      //     pages.push(currentPage)
-      //     currentPage = [section]
-      //     currentHeight = sectionHeight
-      //   } else {
-      //     // Add to current page
-      //     currentPage.push(section)
-      //     currentHeight += sectionHeight
-      //   }
-      // }
-
-      // Add the last page if there are remaining sections
-      // if (currentPage.length > 0) {
-      //   pages.push(currentPage)
-      // }
-
-      // setPageContents(pages)
-      // setTotalPages(pages.length)
-
-      // Reset to first page when content changes significantly
-      // if (currentPage.length > 0 && currentPage > pages.length) {
-      //   setCurrentPage(1)
-      // }
       // 섹션을 더 작은 단위로 분할하여 페이지 간에 자연스럽게 흐르도록 합니다
       const splitSectionsIntoItems = () => {
         // 헤더는 항상 첫 페이지에 고정
@@ -516,6 +473,50 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
                           dangerouslySetInnerHTML={{ __html: exp.description }}
                         ></div>
                       )}
+                    </div>
+                  </div>
+                </div>,
+              )
+            })
+          } else if (sectionKey === "publications") {
+            const sectionIndex = sectionOrder.indexOf("publications") + 2
+            items.push(
+              <div key={`publications-header`} className="mb-3">
+                <h2 className="text-sm font-bold border-b border-gray-300 pb-1 mb-3 text-gray-800">
+                  {String(sectionIndex).padStart(2, "0")}. PUBLICATIONS
+                </h2>
+              </div>,
+            )
+
+            publications.forEach((pub, index) => {
+              items.push(
+                <div key={`publication-item-${index}`} className="mb-3">
+                  <div className="grid grid-cols-[1fr_2fr] gap-2">
+                    <div className="text-sm text-gray-700">
+                      {pub.date && <div className="font-medium">{pub.date}</div>}
+                    </div>
+                    <div>
+                      <div className="flex flex-col">
+                        <h3 className="font-semibold text-gray-900">{pub.title}</h3>
+                        <div className="text-sm text-gray-700">{pub.authors}</div>
+                        <div className="text-sm text-gray-600 italic">{pub.conference}</div>
+                        <div className="text-sm text-gray-500">{pub.status}</div>
+                        {pub.summary && (
+                          <div className="text-sm text-gray-700">{pub.summary}</div>
+                        )}
+                        {pub.url && (
+                          <div className="text-xs mt-0.5">
+                            <a
+                              href={pub.url}
+                              className="text-blue-600 hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {pub.url}
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>,
@@ -652,7 +653,8 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
           itemKey?.includes("education-header") ||
           itemKey?.includes("projects-header") ||
           itemKey?.includes("experience-header") ||
-          itemKey?.includes("awards-header")
+          itemKey?.includes("awards-header") ||
+          itemKey?.includes("publications-header")
         ) {
           return 40 // 섹션 헤더 높이
         }
@@ -694,6 +696,14 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
             height += Math.ceil(exp.description.length / 100) * 20
           }
 
+          return height
+        }
+
+        if (itemKey?.includes("publication-item")) {
+          const index = Number.parseInt(itemKey.split("-").pop() || "0")
+          const pub = publications[index]
+          let height = 80
+          if (pub.summary) height += Math.ceil(pub.summary.length / 100) * 20
           return height
         }
 
@@ -752,7 +762,7 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
         setCurrentPage(1)
       }
     }
-  }, [resumeData, personalDetails, professionalSummary, education, projects, experience, skills, awards])
+  }, [resumeData, personalDetails, professionalSummary, education, projects, experience, skills, awards, publications])
 
   const handlePrevPage = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev))
